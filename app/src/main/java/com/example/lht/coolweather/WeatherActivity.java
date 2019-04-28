@@ -40,6 +40,8 @@ public class WeatherActivity extends AppCompatActivity {
     public DrawerLayout drawerLayout;
     private Button navButton;
 
+    private static String all_weatherId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,24 +79,24 @@ public class WeatherActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weartherString = prefs.getString("weather", null);
 
-        final String weatherId;
+
         if (weartherString != null) {
             //有缓存直接解析天气数据
             Weather weather = Utility.handleWeatherResponse(weartherString);
-            weatherId = weather.basic.weatherId;
+            all_weatherId = weather.basic.weatherId;
             showWeatherInfo(weather);
 
         } else {
             //无缓存时去服务器查询天气
-            weatherId = getIntent().getStringExtra("weather_id");
+            all_weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
-            requestWeather(weatherId);
+            requestWeather(all_weatherId);
         }
 
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                requestWeather(weatherId);
+                requestWeather(all_weatherId);
             }
         });
 
@@ -117,6 +119,7 @@ public class WeatherActivity extends AppCompatActivity {
      * 根据天气id请求城市天气信息
      * */
     public void requestWeather(final String weatherId) {
+        all_weatherId = weatherId;
         String weatherUrl = "http://guolin.tech/api/weather?cityid=" + weatherId;
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
